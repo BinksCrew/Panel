@@ -14,8 +14,8 @@ export function meta({}: Route.MetaArgs) {
 export default function LoginRoute() {
   const navigate = useNavigate();
   const { login, token, ready, user } = useAuth();
-  const [email, setEmail] = useState("admin@mail.com");
-  const [password, setPassword] = useState("secret123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,9 +79,6 @@ export default function LoginRoute() {
           >
             {loading ? "Validando..." : "Entrar"}
           </button>
-          <p className="text-xs text-slate-500 text-center">
-            Admin demo: admin@mail.com / secret123
-          </p>
         </Form>
       </div>
     </div>

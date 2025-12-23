@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../lib/auth";
 import type { SVGProps } from "react";
 
@@ -121,10 +121,12 @@ export default function DashboardLayout() {
             <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-lg font-bold">
               B
             </div>
-            <div className="sidebar-brand">
-              <p className="text-sm opacity-80">Admin Board</p>
-              <p className="font-semibold">Binks Control</p>
-            </div>
+            {!collapsed && (
+              <div className="sidebar-brand">
+                <p className="text-sm opacity-80">Admin Board</p>
+                <p className="font-semibold">Binks Control</p>
+              </div>
+            )}
           </div>
           <button
             className="sidebar-toggle"
@@ -132,7 +134,7 @@ export default function DashboardLayout() {
             onClick={() => setCollapsed((v) => !v)}
             aria-label={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
           >
-            {collapsed ? "«" : "»"}
+            {collapsed ? "»" : "«"}
           </button>
         </div>
         <nav className="space-y-2">
@@ -147,27 +149,33 @@ export default function DashboardLayout() {
                 }`
               }
               onClick={() => setMobileOpen(false)}
+              title={collapsed ? item.label : undefined}
             >
               <item.icon />
-              <span className="nav-label">{item.label}</span>
+              {!collapsed && <span className="nav-label">{item.label}</span>}
             </NavLink>
           ))}
         </nav>
-        <div className="ghost-divider my-6" />
-        <div className="space-y-2 text-sm sidebar-meta">
-          <p className="text-white/70">Rol</p>
-          <p className="font-semibold">{user?.roles?.join(", ")}</p>
-          <p className="text-white/70">Correo</p>
-          <p className="font-semibold wrap-break-word">{user?.email}</p>
-        </div>
+        {!collapsed && (
+          <>
+            <div className="ghost-divider my-6" />
+            <div className="space-y-2 text-sm sidebar-meta">
+              <p className="text-white/70">Rol</p>
+              <p className="font-semibold">{user?.roles?.join(", ")}</p>
+              <p className="text-white/70">Correo</p>
+              <p className="font-semibold wrap-break-word">{user?.email}</p>
+            </div>
+          </>
+        )}
         <button
           className="btn-ghost w-full mt-8"
           onClick={() => {
             logout();
             navigate("/", { replace: true });
           }}
+          title={collapsed ? "Cerrar sesión" : undefined}
         >
-          Cerrar sesión
+          {collapsed ? "↪" : "Cerrar sesión"}
         </button>
       </aside>
     ),
@@ -175,9 +183,9 @@ export default function DashboardLayout() {
   );
 
   return (
-    <div className="min-h-screen px-4 py-6 lg:px-8">
+    <div className="h-screen overflow-hidden px-4 lg:px-8">
       {!ready ? (
-        <div className="min-h-[60vh] flex items-center justify-center text-slate-600">
+        <div className="h-full flex items-center justify-center text-slate-600">
           Cargando sesión...
         </div>
       ) : (
@@ -199,11 +207,11 @@ export default function DashboardLayout() {
           />
 
           <div
-            className="lg:grid lg:gap-6"
+            className="h-full lg:grid"
             style={{ gridTemplateColumns: collapsed ? "110px 1fr" : "280px 1fr" }}
           >
             <div
-              className={`fixed inset-y-0 left-0 z-50 max-w-[85vw] transition-transform duration-200 lg:static lg:translate-x-0 ${
+              className={`fixed inset-y-0 left-0 z-50 max-w-[85vw] transition-transform duration-200 lg:static lg:translate-x-0 lg:h-full ${
                 mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
               }`}
               style={{ width: collapsed ? "110px" : "260px" }}
@@ -211,8 +219,8 @@ export default function DashboardLayout() {
               {sidebar}
             </div>
 
-            <main className="glass-panel p-6 lg:p-8 mt-16 lg:mt-0">
-              <header className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between mb-6">
+            <main className="glass-panel p-6 lg:p-8 flex flex-col h-full lg:h-auto overflow-hidden">
+              <header className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between mb-6 flex-shrink-0">
                 <div>
                   <p className="text-sm text-slate-500">Panel administrativo</p>
                   <h1 className="text-3xl font-semibold text-slate-900">Visión general</h1>
@@ -223,20 +231,11 @@ export default function DashboardLayout() {
                     className="input-field w-64"
                     placeholder="Buscar en el panel"
                   />
-                  <button
-                    type="button"
-                    className="btn-ghost hidden lg:inline-flex"
-                    onClick={() => setCollapsed((v) => !v)}
-                    aria-label={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
-                  >
-                    {collapsed ? "Expandir" : "Colapsar"}
-                  </button>
-                  <Link to="/app/questions" className="btn-primary hidden sm:inline-flex">
-                    Nueva pregunta
-                  </Link>
                 </div>
               </header>
-              <Outlet />
+              <div className="flex-1 overflow-auto">
+                <Outlet />
+              </div>
             </main>
           </div>
         </>

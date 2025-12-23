@@ -101,8 +101,8 @@ export default function QuestionsRoute() {
   };
 
   return (
-    <div className="soft-grid">
-      <section className="card p-5">
+    <div className="flex flex-col h-full space-y-6">
+      <section className="card p-5 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm text-slate-500">Crear pregunta</p>
@@ -152,15 +152,25 @@ export default function QuestionsRoute() {
         {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
       </section>
 
-      <section className="card p-5">
-        <div className="flex items-center justify-between mb-3">
+      <section className="card p-5 flex flex-col flex-1 min-h-0">
+        <div className="flex items-center justify-between mb-3 flex-shrink-0">
           <div>
             <p className="text-sm text-slate-500">Preguntas</p>
             <h2 className="text-xl font-semibold text-slate-900">Listado</h2>
           </div>
-          <span className="pill">{loading ? "Cargando" : `${questions.length} activas`}</span>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              // Scroll to the create form or focus on it
+              const formSection = document.querySelector('section:first-of-type');
+              formSection?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            Nueva pregunta
+          </button>
         </div>
-        <div className="table-wrapper">
+        <div className="table-wrapper flex-1 overflow-auto">
           <table className="data-table">
             <thead>
               <tr>
