@@ -10,6 +10,7 @@ export function meta() {
 const navItems = [
   { to: "/app", label: "Dashboard", icon: DashboardIcon },
   { to: "/app/users", label: "Usuarios", icon: UsersIcon },
+  { to: "/app/animes", label: "Animes", icon: AnimesIcon },
   { to: "/app/questions", label: "Preguntas", icon: QuestionsIcon },
   { to: "/app/settings", label: "Ajustes", icon: SettingsIcon },
 ];
@@ -52,6 +53,25 @@ function UsersIcon(props: SVGProps<SVGSVGElement>) {
       <path d="M5 20v-1a4 4 0 0 1 4-4h0" />
       <circle cx="17" cy="8" r="3" />
       <path d="M14 20v-1a4 4 0 0 1 4-4h0" />
+    </svg>
+  );
+}
+
+function AnimesIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
     </svg>
   );
 }

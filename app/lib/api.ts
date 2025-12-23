@@ -123,7 +123,7 @@ export interface QuestionRecord {
   id: string;
   question: string;
   type: string;
-  anime?: string;
+  anime?: { id: string; name: string } | string;
   options?: string[];
   correctAnswer?: string;
 }
@@ -135,7 +135,7 @@ export function fetchQuestions(token: string) {
 export interface QuestionPayload {
   question: string;
   type: string;
-  anime?: string;
+  animeId?: string;
   correctAnswer?: string;
   options?: string[];
 }
@@ -155,4 +155,30 @@ export function deleteQuestion(id: string, token: string) {
   });
 }
 
+export interface AnimeRecord {
+  id: string;
+  name: string;
+  description?: string;
+  coverImage?: string;
+  createdAt: string;
+}
+
+export function fetchAnimes(token: string) {
+  return request<AnimeRecord[]>("/animes", { token });
+}
+
+export function createAnime(data: { name: string; description?: string; coverImage?: string }, token: string) {
+  return request<AnimeRecord>("/animes", {
+    method: "POST",
+    token,
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAnime(id: string, token: string) {
+  return request<void>(`/animes/${id}`, {
+    method: "DELETE",
+    token,
+  });
+}
 export { API_BASE };

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createQuestion, deleteQuestion, fetchQuestions, type QuestionRecord } from "../../lib/api";
+import { createQuestion, deleteQuestion, fetchQuestions, fetchAnimes, type QuestionRecord, type AnimeRecord } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 
 export function meta() {
@@ -9,6 +9,7 @@ export function meta() {
 export default function QuestionsRoute() {
   const { token } = useAuth();
   const [questions, setQuestions] = useState<QuestionRecord[]>([]);
+  const [animes, setAnimes] = useState<AnimeRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +17,7 @@ export default function QuestionsRoute() {
   const [form, setForm] = useState({
     question: "",
     type: "multiple-choice",
-    anime: "",
+    animeId: "",
     correctAnswer: "",
     options: "",
   });
@@ -29,8 +30,9 @@ export default function QuestionsRoute() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchQuestions(token);
-      setQuestions(data);
+      const [qData, aData] = await Promise.all([fetchQuestions(token), fetchAnimes(token)]);
+      setQuestions(qData);
+      setAnimes(aData);
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo cargar";
       setError(message);
@@ -71,14 +73,14 @@ export default function QuestionsRoute() {
         {
           question: form.question,
           type: form.type,
-          anime: form.anime || undefined,
+          animeId: form.animeId || undefined,
           correctAnswer: form.correctAnswer,
           options,
         },
         token
       );
       setMessage("Pregunta creada");
-      setForm({ question: "", type: "multiple-choice", anime: "", correctAnswer: "", options: "" });
+      setForm({ question: "", type: "multiple-choice", animeId: "", correctAnswer: "", options: "" });
       setIsModalOpen(false);
       await load();
     } catch (err) {
@@ -161,7 +163,9 @@ export default function QuestionsRoute() {
                       </span>
                     </td>
                     <td>
-                      <span className="data-chip bg-slate-900 text-white">{question.anime || "General"}</span>
+                      <span className="data-chip bg-slate-900 text-white">
+                        {typeof question.anime === 'object' ? question.anime?.name : question.anime || "General"}
+                      </span>
                     </td>
                     <td>
                       {question.options?.length ? (
@@ -235,12 +239,18 @@ export default function QuestionsRoute() {
                     value={form.question}
                     onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
                   />
-                  <input
+                  <select
                     className="input-field"
-                    placeholder="Anime"
-                    value={form.anime}
-                    onChange={(e) => setForm((p) => ({ ...p, anime: e.target.value }))}
-                  />
+                    value={form.animeId}
+                    onChange={(e) => setForm((p) => ({ ...p, animeId: e.target.value }))}
+                  >
+                    <option value="">Seleccionar Anime</option>
+                    {animes.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </select>
                   <select
                     className="input-field"
                     value={form.type}

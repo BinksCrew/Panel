@@ -18,6 +18,10 @@ export default [
         file: "routes/dashboard/users.tsx",
       },
       {
+        path: "animes",
+        file: "routes/dashboard/animes.tsx", // Anime management route
+      },
+      {
         path: "questions",
         file: "routes/dashboard/questions.tsx",
       },
