@@ -257,3 +257,47 @@ body {
   cursor: not-allowed;
   box-shadow: none;
 }
+
+.bar-track {
+  height: 12px;
+  width: 100%;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-track.small {
+  height: 10px;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #10b981, #0f766e);
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
+.sparkline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12px, 1fr));
+  align-items: end;
+  gap: 8px;
+  height: 160px;
+  padding: 8px;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), transparent 70%);
+  border-radius: 14px;
+  border: 1px dashed rgba(15, 118, 110, 0.2);
+}
+
+.spark-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #22d3ee 0%, #0f766e 100%);
+  border-radius: 10px 10px 4px 4px;
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
+  transition: transform 120ms ease;
+}
+
+.spark-bar:hover {
+  transform: translateY(-4px);
+}
