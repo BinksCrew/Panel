@@ -1,0 +1,157 @@
+const rawBase = (import.meta.env.VITE_API_URL as string | undefined) ?? "/api";
+const API_BASE = normalizeBase(rawBase);
+
+type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+
+interface ApiError {
+  status: number;
+  message: string;
+}
+
+async function request<T>(
+  path: string,
+  options: {
+    method?: HttpMethod;
+    token?: string | null;
+    body?: BodyInit | null;
+    headers?: Record<string, string>;
+  } = {}
+): Promise<T> {
+  const { method = "GET", token, body, headers = {} } = options;
+  const res = await fetch(`${API_BASE}${path}`.replace(/\/$/, ""), {
+    method,
+    headers: {
+      Accept: "application/json",
+      ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const data = await res.json();
+      message = data?.message || data?.error || message;
+    } catch (_) {
+      /* ignore json parse errors */
+    }
+    const err: ApiError = { status: res.status, message };
+    throw err;
+  }
+
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+function normalizeBase(base: string) {
+  const trimmed = base.replace(/\/$/, "");
+  if (/\/api$/i.test(trimmed)) return trimmed;
+  return `${trimmed}/api`;
+}
+
+export interface LoginResponse {
+  id: string;
+  email: string;
+  fullName?: string;
+  roles: string[];
+  isActive: boolean;
+  token: string;
+}
+
+export async function loginRequest(email: string, password: string) {
+  return request<LoginResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export interface HealthResponse {
+  status: string;
+  database?: string;
+  timestamp?: string;
+}
+
+export function fetchHealth(token?: string | null) {
+  return request<HealthResponse>("/health", { token });
+}
+
+export interface UserRecord {
+  id: string;
+  email: string;
+  fullName?: string;
+  username?: string;
+  phone?: string;
+  photo_url?: string | null;
+  roles: string[];
+  cedula?: string;
+  isActive?: boolean;
+}
+
+export function fetchUsers(token: string) {
+  return request<UserRecord[]>("/users", { token });
+}
+
+interface UserPayload {
+  cedula: string;
+  email: string;
+  password: string;
+  fullName?: string;
+  username?: string;
+  phone?: string;
+  file?: File;
+}
+
+export function createUser(payload: Partial<UserPayload>, token: string) {
+  const form = new FormData();
+  if (payload.cedula) form.append("cedula", payload.cedula);
+  if (payload.email) form.append("email", payload.email);
+  if (payload.password) form.append("password", payload.password);
+  if (payload.fullName) form.append("fullName", payload.fullName);
+  if (payload.username) form.append("username", payload.username);
+  if (payload.phone) form.append("phone", payload.phone);
+  if (payload.file) form.append("file", payload.file);
+  return request<UserRecord>("/users", { method: "POST", body: form, token });
+}
+
+export function deleteUser(id: string, token: string) {
+  return request<{ message: string }>(`/users/${id}`, { method: "DELETE", token });
+}
+
+export interface QuestionRecord {
+  id: string;
+  question: string;
+  type: string;
+  anime?: string;
+  options?: string[];
+}
+
+export function fetchQuestions(token: string) {
+  return request<QuestionRecord[]>("/questions", { token });
+}
+
+export interface QuestionPayload {
+  question: string;
+  type: string;
+  anime?: string;
+  correctAnswer?: string;
+  options?: string[];
+}
+
+export function createQuestion(payload: QuestionPayload, token: string) {
+  return request<QuestionRecord>("/questions", {
+    method: "POST",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteQuestion(id: string, token: string) {
+  return request<{ message: string }>(`/questions/${id}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export { API_BASE };
