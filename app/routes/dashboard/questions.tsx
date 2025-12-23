@@ -20,6 +20,7 @@ export default function QuestionsRoute() {
     correctAnswer: "",
     options: "",
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const PAGE_SIZE = 8;
   const [page, setPage] = useState(1);
 
@@ -78,6 +79,7 @@ export default function QuestionsRoute() {
       );
       setMessage("Pregunta creada");
       setForm({ question: "", type: "multiple-choice", anime: "", correctAnswer: "", options: "" });
+      setIsModalOpen(false);
       await load();
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo crear";
@@ -101,57 +103,7 @@ export default function QuestionsRoute() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      <section className="card p-5 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm text-slate-500">Crear pregunta</p>
-            <h2 className="text-xl font-semibold text-slate-900">Nueva pregunta</h2>
-          </div>
-          <span className="pill">Tipo: {form.type}</span>
-        </div>
-        <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-          <input
-            className="input-field"
-            placeholder="Pregunta"
-            required
-            value={form.question}
-            onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
-          />
-          <input
-            className="input-field"
-            placeholder="Anime"
-            value={form.anime}
-            onChange={(e) => setForm((p) => ({ ...p, anime: e.target.value }))}
-          />
-          <select
-            className="input-field"
-            value={form.type}
-            onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
-          >
-            <option value="multiple-choice">Multiple-choice</option>
-            <option value="open">Abierta</option>
-          </select>
-          <input
-            className="input-field"
-            placeholder="Respuesta correcta"
-            value={form.correctAnswer}
-            onChange={(e) => setForm((p) => ({ ...p, correctAnswer: e.target.value }))}
-          />
-          <input
-            className="input-field md:col-span-2"
-            placeholder="Opciones separadas por coma"
-            value={form.options}
-            onChange={(e) => setForm((p) => ({ ...p, options: e.target.value }))}
-          />
-          <button type="submit" className="btn-primary" disabled={submitting}>
-            {submitting ? "Guardando..." : "Guardar pregunta"}
-          </button>
-        </form>
-        {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
-        {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
-      </section>
-
+    <div className="flex flex-col h-full">
       <section className="card p-5 flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-between mb-3 flex-shrink-0">
           <div>
@@ -161,11 +113,7 @@ export default function QuestionsRoute() {
           <button
             type="button"
             className="btn-primary"
-            onClick={() => {
-              // Scroll to the create form or focus on it
-              const formSection = document.querySelector('section:first-of-type');
-              formSection?.scrollIntoView({ behavior: 'smooth' });
-            }}
+            onClick={() => setIsModalOpen(true)}
           >
             Nueva pregunta
           </button>
@@ -175,6 +123,7 @@ export default function QuestionsRoute() {
             <thead>
               <tr>
                 <th>Pregunta</th>
+                <th>Respuesta Correcta</th>
                 <th>Tipo</th>
                 <th>Anime</th>
                 <th>Opciones</th>
@@ -185,7 +134,7 @@ export default function QuestionsRoute() {
               {loading ? (
                 Array.from({ length: PAGE_SIZE }).map((_, idx) => (
                   <tr key={`skeleton-${idx}`} className="animate-pulse">
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="h-4 w-1/3 bg-slate-200 rounded" />
                       <div className="h-3 w-1/4 bg-slate-200 rounded mt-2" />
                     </td>
@@ -193,7 +142,7 @@ export default function QuestionsRoute() {
                 ))
               ) : questions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-600">
+                  <td colSpan={6} className="py-6 text-center text-slate-600">
                     No hay preguntas registradas. Crea la primera desde el formulario.
                   </td>
                 </tr>
@@ -202,7 +151,9 @@ export default function QuestionsRoute() {
                   <tr key={question.id}>
                     <td>
                       <p className="font-semibold text-slate-900 leading-snug">{question.question}</p>
-                      <p className="text-xs text-slate-500 mt-1">Respuesta correcta: {question.correctAnswer}</p>
+                    </td>
+                    <td>
+                      <span className="text-sm font-medium text-emerald-700">{question.correctAnswer}</span>
                     </td>
                     <td>
                       <span className="data-chip bg-emerald-100 text-emerald-800">
@@ -265,6 +216,64 @@ export default function QuestionsRoute() {
           </div>
         ) : null}
       </section>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+               <h2 className="text-xl font-semibold text-slate-900">Nueva pregunta</h2>
+               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                 ✕
+               </button>
+            </div>
+            <div className="p-5 overflow-y-auto">
+                <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+                  <input
+                    className="input-field"
+                    placeholder="Pregunta"
+                    required
+                    value={form.question}
+                    onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
+                  />
+                  <input
+                    className="input-field"
+                    placeholder="Anime"
+                    value={form.anime}
+                    onChange={(e) => setForm((p) => ({ ...p, anime: e.target.value }))}
+                  />
+                  <select
+                    className="input-field"
+                    value={form.type}
+                    onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
+                  >
+                    <option value="multiple-choice">Multiple-choice</option>
+                    <option value="open">Abierta</option>
+                  </select>
+                  <input
+                    className="input-field"
+                    placeholder="Respuesta correcta"
+                    value={form.correctAnswer}
+                    onChange={(e) => setForm((p) => ({ ...p, correctAnswer: e.target.value }))}
+                  />
+                  <input
+                    className="input-field md:col-span-2"
+                    placeholder="Opciones separadas por coma"
+                    value={form.options}
+                    onChange={(e) => setForm((p) => ({ ...p, options: e.target.value }))}
+                  />
+                  <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">Cancelar</button>
+                    <button type="submit" className="btn-primary" disabled={submitting}>
+                        {submitting ? "Guardando..." : "Guardar pregunta"}
+                    </button>
+                  </div>
+                </form>
+                {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
+                {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

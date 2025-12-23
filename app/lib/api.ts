@@ -1,4 +1,4 @@
-const rawBase = (import.meta.env.VITE_API_URL as string | undefined) ?? "/api";
+const rawBase = (import.meta.env.VITE_API_URL as string | undefined) ?? (import.meta.env.DEV ? "http://localhost:3000/api" : "/api");
 const API_BASE = normalizeBase(rawBase);
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
@@ -125,6 +125,7 @@ export interface QuestionRecord {
   type: string;
   anime?: string;
   options?: string[];
+  correctAnswer?: string;
 }
 
 export function fetchQuestions(token: string) {

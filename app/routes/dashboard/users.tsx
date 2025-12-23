@@ -20,6 +20,7 @@ export default function UsersRoute() {
     cedula: "",
     phone: "",
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const PAGE_SIZE = 8;
   const [page, setPage] = useState(1);
 
@@ -65,6 +66,7 @@ export default function UsersRoute() {
       await createUser(form, token);
       setMessage("Usuario creado");
       setForm({ email: "", password: "", fullName: "", cedula: "", phone: "" });
+      setIsModalOpen(false);
       await load();
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo crear";
@@ -88,65 +90,20 @@ export default function UsersRoute() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      <section className="card p-5 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm text-slate-500">Alta de usuario</p>
-            <h2 className="text-xl font-semibold text-slate-900">Crear usuario</h2>
-          </div>
-          <span className="pill">Rol requerido: admin</span>
-        </div>
-        <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-          <input
-            className="input-field"
-            placeholder="Nombre completo"
-            value={form.fullName}
-            onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
-          />
-          <input
-            className="input-field"
-            placeholder="Correo"
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-          />
-          <input
-            className="input-field"
-            placeholder="Contraseña"
-            type="password"
-            required
-            value={form.password}
-            onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-          />
-          <input
-            className="input-field"
-            placeholder="Cédula"
-            value={form.cedula}
-            onChange={(e) => setForm((p) => ({ ...p, cedula: e.target.value }))}
-          />
-          <input
-            className="input-field"
-            placeholder="Teléfono"
-            value={form.phone}
-            onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-          />
-          <button type="submit" className="btn-primary" disabled={submitting}>
-            {submitting ? "Guardando..." : "Crear usuario"}
-          </button>
-        </form>
-        {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
-        {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
-      </section>
-
+    <div className="flex flex-col h-full">
       <section className="card p-5 flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-between mb-3 flex-shrink-0">
           <div>
             <p className="text-sm text-slate-500">Usuarios</p>
             <h2 className="text-xl font-semibold text-slate-900">Listado</h2>
           </div>
-          <span className="pill">{loading ? "Cargando" : `${users.length} registros`}</span>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Crear usuario
+          </button>
         </div>
         <div className="table-wrapper flex-1 overflow-auto">
           <table className="data-table">
@@ -249,6 +206,65 @@ export default function UsersRoute() {
           </div>
         ) : null}
       </section>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+               <h2 className="text-xl font-semibold text-slate-900">Crear usuario</h2>
+               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                 ✕
+               </button>
+            </div>
+            <div className="p-5 overflow-y-auto">
+                <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+                  <input
+                    className="input-field"
+                    placeholder="Nombre completo"
+                    value={form.fullName}
+                    onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
+                  />
+                  <input
+                    className="input-field"
+                    placeholder="Correo"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  />
+                  <input
+                    className="input-field"
+                    placeholder="Contraseña"
+                    type="password"
+                    required
+                    value={form.password}
+                    onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                  />
+                  <input
+                    className="input-field"
+                    placeholder="Cédula"
+                    value={form.cedula}
+                    onChange={(e) => setForm((p) => ({ ...p, cedula: e.target.value }))}
+                  />
+                  <input
+                    className="input-field"
+                    placeholder="Teléfono"
+                    value={form.phone}
+                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                  />
+                  <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">Cancelar</button>
+                    <button type="submit" className="btn-primary" disabled={submitting}>
+                        {submitting ? "Guardando..." : "Crear usuario"}
+                    </button>
+                  </div>
+                </form>
+                {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
+                {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
