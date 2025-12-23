@@ -45,7 +45,9 @@ export default function OverviewRoute() {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [questions, setQuestions] = useState<QuestionRecord[]>([]);
   const [animes, setAnimes] = useState<AnimeRecord[]>([]);
-  const [stats, setStats] = useState<{ users: number; animes: number; questions: number } | null>(null);
+  const [stats, setStats] = useState<{ users: number; animes: number; questions: number } | null>(
+    null
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -115,15 +117,23 @@ export default function OverviewRoute() {
     );
     const total = totals.open + totals.multiple;
     return [
-      { label: "Opción múltiple", value: totals.multiple, pct: total ? Math.round((totals.multiple / total) * 100) : 0 },
-      { label: "Abierta", value: totals.open, pct: total ? Math.round((totals.open / total) * 100) : 0 },
+      {
+        label: "Opción múltiple",
+        value: totals.multiple,
+        pct: total ? Math.round((totals.multiple / total) * 100) : 0,
+      },
+      {
+        label: "Abierta",
+        value: totals.open,
+        pct: total ? Math.round((totals.open / total) * 100) : 0,
+      },
     ];
   }, [questions]);
 
   const topAnime = useMemo(() => {
     const counts: Record<string, number> = {};
     questions.forEach((q) => {
-      const key = typeof q.anime === 'object' ? q.anime?.name : q.anime || "General";
+      const key = typeof q.anime === "object" ? q.anime?.name : q.anime || "General";
       counts[key] = (counts[key] || 0) + 1;
     });
     return Object.entries(counts)
@@ -143,11 +153,11 @@ export default function OverviewRoute() {
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       weekEnd.setHours(23, 59, 59, 999);
-      const userCount = users.filter(u => {
+      const userCount = users.filter((u) => {
         const created = new Date(u.createdAt);
         return created >= weekStart && created <= weekEnd;
       }).length;
-      const questionCount = questions.filter(q => {
+      const questionCount = questions.filter((q) => {
         const created = new Date(q.createdAt);
         return created >= weekStart && created <= weekEnd;
       }).length;
@@ -162,7 +172,7 @@ export default function OverviewRoute() {
 
   const weeklyActivityData = useMemo(() => {
     const now = new Date();
-    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const currentDay = now.getDay(); // 0 = Sunday
     return days.map((day, index) => {
       const dayIndex = (currentDay + index) % 7;
@@ -171,7 +181,7 @@ export default function OverviewRoute() {
       dayDate.setHours(0, 0, 0, 0);
       const nextDay = new Date(dayDate);
       nextDay.setDate(dayDate.getDate() + 1);
-      const count = users.filter(u => {
+      const count = users.filter((u) => {
         const created = new Date(u.createdAt);
         return created >= dayDate && created < nextDay;
       }).length;
@@ -180,12 +190,15 @@ export default function OverviewRoute() {
   }, [users]);
 
   const userRolesData = useMemo(() => {
-    const roles = users.reduce((acc, user) => {
-      user.roles.forEach((role) => {
-        acc[role] = (acc[role] || 0) + 1;
-      });
-      return acc;
-    }, {} as Record<string, number>);
+    const roles = users.reduce(
+      (acc, user) => {
+        user.roles.forEach((role) => {
+          acc[role] = (acc[role] || 0) + 1;
+        });
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const colors = ["#10b981", "#0ea5e9", "#f59e0b", "#ef4444", "#8b5cf6"];
     return Object.entries(roles).map(([role, count], index) => ({
@@ -240,12 +253,20 @@ export default function OverviewRoute() {
               <div key={item.label} className="space-y-2">
                 <div className="flex items-center justify-between text-sm font-semibold">
                   <span className="text-slate-700">{item.label}</span>
-                  <span className="text-slate-900">{item.value} · {item.pct}%</span>
+                  <span className="text-slate-900">
+                    {item.value} · {item.pct}%
+                  </span>
                 </div>
                 <div className="bar-track">
                   <div
                     className="bar-fill"
-                    style={{ width: `${item.pct}%`, background: item.label === "Abierta" ? "linear-gradient(90deg,#0ea5e9,#22d3ee)" : "linear-gradient(90deg,#10b981,#0f766e)" }}
+                    style={{
+                      width: `${item.pct}%`,
+                      background:
+                        item.label === "Abierta"
+                          ? "linear-gradient(90deg,#0ea5e9,#22d3ee)"
+                          : "linear-gradient(90deg,#10b981,#0f766e)",
+                    }}
                   />
                 </div>
               </div>
@@ -268,15 +289,21 @@ export default function OverviewRoute() {
                   {idx + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-900">{(item as typeof topAnime[number])?.label || "..."}</p>
+                  <p className="font-semibold text-slate-900">
+                    {(item as (typeof topAnime)[number])?.label || "..."}
+                  </p>
                   <div className="bar-track small">
                     <div
                       className="bar-fill"
-                      style={{ width: `${Math.min(100, ((item as typeof topAnime[number])?.value || 0) * 12)}%` }}
+                      style={{
+                        width: `${Math.min(100, ((item as (typeof topAnime)[number])?.value || 0) * 12)}%`,
+                      }}
                     />
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-slate-700">{(item as typeof topAnime[number])?.value ?? 0}</span>
+                <span className="text-sm font-semibold text-slate-700">
+                  {(item as (typeof topAnime)[number])?.value ?? 0}
+                </span>
               </div>
             ))}
           </div>
@@ -338,7 +365,9 @@ export default function OverviewRoute() {
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
                   Tipo {(question as QuestionRecord)?.type || "-"} · Anime{" "}
-                  {typeof (question as QuestionRecord)?.anime === 'object' ? (question as QuestionRecord)?.anime?.name : (question as QuestionRecord)?.anime || "general"}
+                  {typeof (question as QuestionRecord)?.anime === "object"
+                    ? (question as QuestionRecord)?.anime?.name
+                    : (question as QuestionRecord)?.anime || "general"}
                 </p>
               </div>
             ))}
@@ -505,23 +534,33 @@ export default function OverviewRoute() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-600">API Status</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                health?.status === "ok" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
-              }`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  health?.status === "ok"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
                 {health?.status || "Desconocido"}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-600">Base de datos</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                health?.database === "connected" ? "bg-emerald-100 text-emerald-800" : "bg-yellow-100 text-yellow-800"
-              }`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  health?.database === "connected"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
                 {health?.database || "Desconocido"}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-600">Usuarios activos</span>
-              <span className="text-sm font-semibold text-slate-900">{users.filter(u => u.isActive !== false).length}</span>
+              <span className="text-sm font-semibold text-slate-900">
+                {users.filter((u) => u.isActive !== false).length}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-600">Preguntas activas</span>
@@ -533,7 +572,10 @@ export default function OverviewRoute() {
                 <span>78%</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2">
-                <div className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-2 rounded-full" style={{ width: "78%" }}></div>
+                <div
+                  className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-2 rounded-full"
+                  style={{ width: "78%" }}
+                ></div>
               </div>
             </div>
           </div>

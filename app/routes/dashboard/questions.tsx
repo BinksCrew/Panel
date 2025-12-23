@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createQuestion, deleteQuestion, fetchQuestions, fetchAnimes, type QuestionRecord, type AnimeRecord } from "../../lib/api";
+import {
+  createQuestion,
+  deleteQuestion,
+  fetchQuestions,
+  fetchAnimes,
+  type QuestionRecord,
+  type AnimeRecord,
+} from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 
 export function meta() {
@@ -48,7 +55,10 @@ export default function QuestionsRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(questions.length / PAGE_SIZE)), [questions.length]);
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(questions.length / PAGE_SIZE)),
+    [questions.length]
+  );
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages);
@@ -82,7 +92,13 @@ export default function QuestionsRoute() {
         token
       );
       setMessage("Pregunta creada");
-      setForm({ question: "", type: "multiple-choice", animeId: "", correctAnswer: "", options: "" });
+      setForm({
+        question: "",
+        type: "multiple-choice",
+        animeId: "",
+        correctAnswer: "",
+        options: "",
+      });
       setIsModalOpen(false);
       await load();
     } catch (err) {
@@ -114,11 +130,7 @@ export default function QuestionsRoute() {
             <p className="text-sm text-slate-500">Preguntas</p>
             <h2 className="text-xl font-semibold text-slate-900">Listado</h2>
           </div>
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => setIsModalOpen(true)}
-          >
+          <button type="button" className="btn-primary" onClick={() => setIsModalOpen(true)}>
             Nueva pregunta
           </button>
         </div>
@@ -154,10 +166,14 @@ export default function QuestionsRoute() {
                 paginatedQuestions.map((question) => (
                   <tr key={question.id}>
                     <td>
-                      <p className="font-semibold text-slate-900 leading-snug">{question.question}</p>
+                      <p className="font-semibold text-slate-900 leading-snug">
+                        {question.question}
+                      </p>
                     </td>
                     <td>
-                      <span className="text-sm font-medium text-emerald-700">{question.correctAnswer}</span>
+                      <span className="text-sm font-medium text-emerald-700">
+                        {question.correctAnswer}
+                      </span>
                     </td>
                     <td>
                       <span className="data-chip bg-emerald-100 text-emerald-800">
@@ -166,7 +182,9 @@ export default function QuestionsRoute() {
                     </td>
                     <td>
                       <span className="data-chip bg-slate-900 text-white">
-                        {typeof question.anime === 'object' ? question.anime?.name : question.anime || "General"}
+                        {typeof question.anime === "object"
+                          ? question.anime?.name
+                          : question.anime || "General"}
                       </span>
                     </td>
                     <td>
@@ -186,7 +204,10 @@ export default function QuestionsRoute() {
                       )}
                     </td>
                     <td className="text-right">
-                      <button className="btn-ghost text-xs" onClick={() => handleDelete(question.id)}>
+                      <button
+                        className="btn-ghost text-xs"
+                        onClick={() => handleDelete(question.id)}
+                      >
                         Eliminar
                       </button>
                     </td>
@@ -227,61 +248,66 @@ export default function QuestionsRoute() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-               <h2 className="text-xl font-semibold text-slate-900">Nueva pregunta</h2>
-               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                 ✕
-               </button>
+              <h2 className="text-xl font-semibold text-slate-900">Nueva pregunta</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ✕
+              </button>
             </div>
             <div className="p-5 overflow-y-auto">
-                <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-                  <input
-                    className="input-field"
-                    placeholder="Pregunta"
-                    required
-                    value={form.question}
-                    onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
-                  />
-                  <select
-                    className="input-field"
-                    value={form.animeId}
-                    onChange={(e) => setForm((p) => ({ ...p, animeId: e.target.value }))}
-                  >
-                    <option value="">Seleccionar Anime</option>
-                    {animes.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    className="input-field"
-                    value={form.type}
-                    onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
-                  >
-                    <option value="multiple-choice">Multiple-choice</option>
-                    <option value="open">Abierta</option>
-                  </select>
-                  <input
-                    className="input-field"
-                    placeholder="Respuesta correcta"
-                    value={form.correctAnswer}
-                    onChange={(e) => setForm((p) => ({ ...p, correctAnswer: e.target.value }))}
-                  />
-                  <input
-                    className="input-field md:col-span-2"
-                    placeholder="Opciones separadas por coma"
-                    value={form.options}
-                    onChange={(e) => setForm((p) => ({ ...p, options: e.target.value }))}
-                  />
-                  <div className="md:col-span-2 flex justify-end gap-3 mt-4">
-                    <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">Cancelar</button>
-                    <button type="submit" className="btn-primary" disabled={submitting}>
-                        {submitting ? "Guardando..." : "Guardar pregunta"}
-                    </button>
-                  </div>
-                </form>
-                {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
-                {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
+              <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+                <input
+                  className="input-field"
+                  placeholder="Pregunta"
+                  required
+                  value={form.question}
+                  onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
+                />
+                <select
+                  className="input-field"
+                  value={form.animeId}
+                  onChange={(e) => setForm((p) => ({ ...p, animeId: e.target.value }))}
+                >
+                  <option value="">Seleccionar Anime</option>
+                  {animes.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="input-field"
+                  value={form.type}
+                  onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
+                >
+                  <option value="multiple-choice">Multiple-choice</option>
+                  <option value="open">Abierta</option>
+                </select>
+                <input
+                  className="input-field"
+                  placeholder="Respuesta correcta"
+                  value={form.correctAnswer}
+                  onChange={(e) => setForm((p) => ({ ...p, correctAnswer: e.target.value }))}
+                />
+                <input
+                  className="input-field md:col-span-2"
+                  placeholder="Opciones separadas por coma"
+                  value={form.options}
+                  onChange={(e) => setForm((p) => ({ ...p, options: e.target.value }))}
+                />
+                <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? "Guardando..." : "Guardar pregunta"}
+                  </button>
+                </div>
+              </form>
+              {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
+              {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
             </div>
           </div>
         </div>

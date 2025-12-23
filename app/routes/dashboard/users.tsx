@@ -46,7 +46,10 @@ export default function UsersRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(users.length / PAGE_SIZE)), [users.length]);
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(users.length / PAGE_SIZE)),
+    [users.length]
+  );
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages);
@@ -99,11 +102,7 @@ export default function UsersRoute() {
             <p className="text-sm text-slate-500">Usuarios</p>
             <h2 className="text-xl font-semibold text-slate-900">Listado</h2>
           </div>
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => setIsModalOpen(true)}
-          >
+          <button type="button" className="btn-primary" onClick={() => setIsModalOpen(true)}>
             Crear usuario
           </button>
         </div>
@@ -139,7 +138,9 @@ export default function UsersRoute() {
                 paginatedUsers.map((user) => (
                   <tr key={user.id}>
                     <td>
-                      <p className="font-semibold text-slate-900 leading-snug">{user.fullName || "Sin nombre"}</p>
+                      <p className="font-semibold text-slate-900 leading-snug">
+                        {user.fullName || "Sin nombre"}
+                      </p>
                       <p className="text-xs text-slate-500 mt-1">ID: {user.id.slice(0, 6)}...</p>
                     </td>
                     <td>
@@ -159,14 +160,18 @@ export default function UsersRoute() {
                     </td>
                     <td>
                       {user.cedula ? (
-                        <span className="data-chip bg-white border border-slate-200 text-slate-800">{user.cedula}</span>
+                        <span className="data-chip bg-white border border-slate-200 text-slate-800">
+                          {user.cedula}
+                        </span>
                       ) : (
                         <span className="text-xs text-slate-500">Sin dato</span>
                       )}
                     </td>
                     <td>
                       {user.phone ? (
-                        <span className="data-chip bg-white border border-slate-200 text-slate-800">{user.phone}</span>
+                        <span className="data-chip bg-white border border-slate-200 text-slate-800">
+                          {user.phone}
+                        </span>
                       ) : (
                         <span className="text-xs text-slate-500">Sin dato</span>
                       )}
@@ -213,56 +218,61 @@ export default function UsersRoute() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-               <h2 className="text-xl font-semibold text-slate-900">Crear usuario</h2>
-               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                 ✕
-               </button>
+              <h2 className="text-xl font-semibold text-slate-900">Crear usuario</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ✕
+              </button>
             </div>
             <div className="p-5 overflow-y-auto">
-                <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-                  <input
-                    className="input-field"
-                    placeholder="Nombre completo"
-                    value={form.fullName}
-                    onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
-                  />
-                  <input
-                    className="input-field"
-                    placeholder="Correo"
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                  />
-                  <input
-                    className="input-field"
-                    placeholder="Contraseña"
-                    type="password"
-                    required
-                    value={form.password}
-                    onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                  />
-                  <input
-                    className="input-field"
-                    placeholder="Cédula"
-                    value={form.cedula}
-                    onChange={(e) => setForm((p) => ({ ...p, cedula: e.target.value }))}
-                  />
-                  <input
-                    className="input-field"
-                    placeholder="Teléfono"
-                    value={form.phone}
-                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                  />
-                  <div className="md:col-span-2 flex justify-end gap-3 mt-4">
-                    <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">Cancelar</button>
-                    <button type="submit" className="btn-primary" disabled={submitting}>
-                        {submitting ? "Guardando..." : "Crear usuario"}
-                    </button>
-                  </div>
-                </form>
-                {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
-                {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
+              <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+                <input
+                  className="input-field"
+                  placeholder="Nombre completo"
+                  value={form.fullName}
+                  onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
+                />
+                <input
+                  className="input-field"
+                  placeholder="Correo"
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                />
+                <input
+                  className="input-field"
+                  placeholder="Contraseña"
+                  type="password"
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                />
+                <input
+                  className="input-field"
+                  placeholder="Cédula"
+                  value={form.cedula}
+                  onChange={(e) => setForm((p) => ({ ...p, cedula: e.target.value }))}
+                />
+                <input
+                  className="input-field"
+                  placeholder="Teléfono"
+                  value={form.phone}
+                  onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                />
+                <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? "Guardando..." : "Crear usuario"}
+                  </button>
+                </div>
+              </form>
+              {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
+              {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
             </div>
           </div>
         </div>

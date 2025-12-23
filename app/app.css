@@ -250,7 +250,9 @@ button:not(:disabled) {
   font-weight: 600;
   color: #0f172a;
   background: white;
-  transition: transform 100ms ease, box-shadow 100ms ease;
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease;
   box-shadow: 0 6px 18px rgba(15, 118, 110, 0.08);
   cursor: pointer;
 }

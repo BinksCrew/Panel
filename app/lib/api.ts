@@ -1,4 +1,6 @@
-const rawBase = (import.meta.env.VITE_API_URL as string | undefined) ?? (import.meta.env.DEV ? "http://localhost:3000/api" : "/api");
+const rawBase =
+  (import.meta.env.VITE_API_URL as string | undefined) ??
+  (import.meta.env.DEV ? "http://localhost:3000/api" : "/api");
 const API_BASE = normalizeBase(rawBase);
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
@@ -169,7 +171,10 @@ export function fetchAnimes(token: string) {
   return request<AnimeRecord[]>("/animes", { token });
 }
 
-export function createAnime(data: { name: string; description?: string; coverImage?: string }, token: string) {
+export function createAnime(
+  data: { name: string; description?: string; coverImage?: string },
+  token: string
+) {
   return request<AnimeRecord>("/animes", {
     method: "POST",
     token,

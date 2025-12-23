@@ -44,7 +44,10 @@ export default function AnimesRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(animes.length / PAGE_SIZE)), [animes.length]);
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(animes.length / PAGE_SIZE)),
+    [animes.length]
+  );
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages);
@@ -109,9 +112,7 @@ export default function AnimesRoute() {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-200">
-          {error}
-        </div>
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-200">{error}</div>
       )}
 
       {message && (
@@ -146,7 +147,9 @@ export default function AnimesRoute() {
                   paginatedAnimes.map((anime) => (
                     <tr key={anime.id} className="hover:bg-gray-50 transition-colors">
                       <td className="py-4 px-6 font-medium text-gray-900">{anime.name}</td>
-                      <td className="py-4 px-6 text-gray-600 max-w-xs truncate">{anime.description || "-"}</td>
+                      <td className="py-4 px-6 text-gray-600 max-w-xs truncate">
+                        {anime.description || "-"}
+                      </td>
                       <td className="py-4 px-6 text-right">
                         <button
                           onClick={() => handleDelete(anime.id)}
@@ -161,7 +164,7 @@ export default function AnimesRoute() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-4 p-4 border-t border-gray-100">
@@ -200,7 +203,7 @@ export default function AnimesRoute() {
                 ✕
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
