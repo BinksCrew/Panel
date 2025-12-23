@@ -1,10 +1,15 @@
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   fetchHealth,
   fetchQuestions,
   fetchUsers,
+  fetchAnimes,
+  fetchStats,
   type QuestionRecord,
   type UserRecord,
+  type AnimeRecord,
 } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import {
@@ -39,6 +44,8 @@ export default function OverviewRoute() {
   const [health, setHealth] = useState<{ status?: string; database?: string } | null>(null);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [questions, setQuestions] = useState<QuestionRecord[]>([]);
+  const [animes, setAnimes] = useState<AnimeRecord[]>([]);
+  const [stats, setStats] = useState<{ users: number; animes: number; questions: number } | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -46,14 +53,18 @@ export default function OverviewRoute() {
     setError(null);
     (async () => {
       try {
-        const [healthRes, usersRes, questionsRes] = await Promise.all([
+        const [healthRes, usersRes, questionsRes, animesRes, statsRes] = await Promise.all([
           fetchHealth(token).catch(() => ({ status: "desconocido" })),
           fetchUsers(token),
           fetchQuestions(token),
+          fetchAnimes(token),
+          fetchStats(token),
         ]);
         setHealth(healthRes);
         setUsers(usersRes);
         setQuestions(questionsRes);
+        setAnimes(animesRes);
+        setStats(statsRes);
       } catch (err) {
         const message = err instanceof Error ? err.message : "No se pudo cargar";
         setError(message);
@@ -67,12 +78,17 @@ export default function OverviewRoute() {
     () => [
       {
         label: "Usuarios",
-        value: users.length,
+        value: stats?.users ?? users.length,
+        delta: "",
+      },
+      {
+        label: "Animes",
+        value: stats?.animes ?? animes.length,
         delta: "",
       },
       {
         label: "Preguntas",
-        value: questions.length,
+        value: stats?.questions ?? questions.length,
         delta: `${questions.filter((q) => q.type === "multiple-choice").length} múltiple-choice`,
       },
       {
@@ -86,7 +102,7 @@ export default function OverviewRoute() {
         delta: health?.database ?? "-",
       },
     ],
-    [users.length, questions]
+    [stats, users.length, animes.length, questions, health]
   );
 
   const questionTypeDistribution = useMemo(() => {
@@ -107,7 +123,7 @@ export default function OverviewRoute() {
   const topAnime = useMemo(() => {
     const counts: Record<string, number> = {};
     questions.forEach((q) => {
-      const key = q.anime || "General";
+      const key = typeof q.anime === 'object' ? q.anime?.name : q.anime || "General";
       counts[key] = (counts[key] || 0) + 1;
     });
     return Object.entries(counts)
@@ -117,28 +133,51 @@ export default function OverviewRoute() {
   }, [questions]);
 
   // Datos para gráficas
-  const userGrowthData = useMemo(() => {
-    // Simular crecimiento de usuarios en las últimas 7 semanas
-    const baseUsers = users.length;
-    return Array.from({ length: 7 }, (_, i) => ({
-      week: `Sem ${i + 1}`,
-      usuarios: Math.max(0, baseUsers - Math.floor(Math.random() * 5) + i * 2),
-      preguntas: Math.max(0, questions.length - Math.floor(Math.random() * 10) + i * 3),
-    }));
-  }, [users.length, questions.length]);
+  const growthData = useMemo(() => {
+    const now = new Date();
+    const weeks = [];
+    for (let i = 6; i >= 0; i--) {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - i * 7);
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+      const userCount = users.filter(u => {
+        const created = new Date(u.createdAt);
+        return created >= weekStart && created <= weekEnd;
+      }).length;
+      const questionCount = questions.filter(q => {
+        const created = new Date(q.createdAt);
+        return created >= weekStart && created <= weekEnd;
+      }).length;
+      weeks.push({
+        week: `Sem ${7 - i}`,
+        usuarios: userCount,
+        preguntas: questionCount,
+      });
+    }
+    return weeks;
+  }, [users, questions]);
 
   const weeklyActivityData = useMemo(() => {
-    // Simular actividad semanal
-    return [
-      { day: "Lun", usuarios: Math.floor(Math.random() * 20) + 5 },
-      { day: "Mar", usuarios: Math.floor(Math.random() * 20) + 5 },
-      { day: "Mié", usuarios: Math.floor(Math.random() * 20) + 5 },
-      { day: "Jue", usuarios: Math.floor(Math.random() * 20) + 5 },
-      { day: "Vie", usuarios: Math.floor(Math.random() * 20) + 5 },
-      { day: "Sáb", usuarios: Math.floor(Math.random() * 20) + 5 },
-      { day: "Dom", usuarios: Math.floor(Math.random() * 20) + 5 },
-    ];
-  }, []);
+    const now = new Date();
+    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const currentDay = now.getDay(); // 0 = Sunday
+    return days.map((day, index) => {
+      const dayIndex = (currentDay + index) % 7;
+      const dayDate = new Date(now);
+      dayDate.setDate(now.getDate() - currentDay + dayIndex);
+      dayDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(dayDate);
+      nextDay.setDate(dayDate.getDate() + 1);
+      const count = users.filter(u => {
+        const created = new Date(u.createdAt);
+        return created >= dayDate && created < nextDay;
+      }).length;
+      return { day, usuarios: count };
+    });
+  }, [users]);
 
   const userRolesData = useMemo(() => {
     const roles = users.reduce((acc, user) => {
@@ -188,7 +227,7 @@ export default function OverviewRoute() {
       </section>
 
       <section className="grid xl:grid-cols-[1.2fr,1fr] gap-4 flex-1 min-h-0">
-        <div className="card p-5 flex flex-col">
+        <div className="card p-5 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div>
               <p className="text-sm text-slate-500">Distribución de preguntas</p>
@@ -214,7 +253,7 @@ export default function OverviewRoute() {
           </div>
         </div>
 
-        <div className="card p-5 flex flex-col">
+        <div className="card p-5 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div>
               <p className="text-sm text-slate-500">Temáticas</p>
@@ -245,7 +284,7 @@ export default function OverviewRoute() {
       </section>
 
       <section className="grid lg:grid-cols-[2fr,1.2fr] gap-4 flex-1 min-h-0">
-        <div className="card p-5 flex flex-col">
+        <div className="card p-5 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div>
               <p className="text-sm text-slate-500">Usuarios</p>
@@ -280,7 +319,7 @@ export default function OverviewRoute() {
           </div>
         </div>
 
-        <div className="card p-5 flex flex-col">
+        <div className="card p-5 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div>
               <p className="text-sm text-slate-500">Preguntas</p>
@@ -299,7 +338,7 @@ export default function OverviewRoute() {
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
                   Tipo {(question as QuestionRecord)?.type || "-"} · Anime{" "}
-                  {(question as QuestionRecord)?.anime || "general"}
+                  {typeof (question as QuestionRecord)?.anime === 'object' ? (question as QuestionRecord)?.anime?.name : (question as QuestionRecord)?.anime || "general"}
                 </p>
               </div>
             ))}
@@ -309,7 +348,7 @@ export default function OverviewRoute() {
 
       {/* Nueva sección con gráficas de tendencias */}
       <section className="grid xl:grid-cols-2 gap-4 flex-shrink-0">
-        <div className="card p-5">
+        <div className="card p-5 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-slate-500">Tendencias</p>
@@ -319,7 +358,7 @@ export default function OverviewRoute() {
           </div>
           <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <LineChart data={userGrowthData}>
+              <LineChart data={growthData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="week" stroke="#64748b" fontSize={12} />
                 <YAxis stroke="#64748b" fontSize={12} />
@@ -351,7 +390,7 @@ export default function OverviewRoute() {
           </div>
         </div>
 
-        <div className="card p-5">
+        <div className="card p-5 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-slate-500">Actividad</p>

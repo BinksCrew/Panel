@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 import { createQuestion, deleteQuestion, fetchQuestions, fetchAnimes, type QuestionRecord, type AnimeRecord } from "../../lib/api";
 import { useAuth } from "../../lib/auth";

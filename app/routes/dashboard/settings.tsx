@@ -1,3 +1,5 @@
+"use client";
+
 import type { Route } from "./+types/dashboard-settings";
 import { API_BASE } from "../../lib/api";
 import { useAuth } from "../../lib/auth";

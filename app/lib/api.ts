@@ -87,6 +87,7 @@ export interface UserRecord {
   roles: string[];
   cedula?: string;
   isActive?: boolean;
+  createdAt: string;
 }
 
 export function fetchUsers(token: string) {
@@ -126,6 +127,7 @@ export interface QuestionRecord {
   anime?: { id: string; name: string } | string;
   options?: string[];
   correctAnswer?: string;
+  createdAt: string;
 }
 
 export function fetchQuestions(token: string) {
@@ -181,4 +183,9 @@ export function deleteAnime(id: string, token: string) {
     token,
   });
 }
+
+export function fetchStats(token: string) {
+  return request<{ users: number; animes: number; questions: number }>("/stats", { token });
+}
+
 export { API_BASE };

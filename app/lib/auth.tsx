@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { loginRequest, type LoginResponse } from "./api";
 
@@ -71,6 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) {
+    return {
+      user: null,
+      token: null,
+      ready: false,
+      error: null,
+      login: async () => {},
+      logout: () => {},
+    };
+  }
   return ctx;
 }

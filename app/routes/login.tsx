@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Form, useNavigate } from "react-router";
 import type { Route } from "./+types/login";
