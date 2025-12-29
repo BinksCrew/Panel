@@ -1,6 +1,6 @@
 const rawBase =
   (import.meta.env.VITE_API_URL as string | undefined) ??
-  (import.meta.env.DEV ? "http://localhost:3000/api" : "/api");
+  (import.meta.env.DEV ? "http://localhost:3000/api" : "https://serverbinks.onrender.com/api");
 const API_BASE = normalizeBase(rawBase);
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
