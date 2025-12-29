@@ -14,6 +14,10 @@ const navItems = [
   { to: "/app/users", label: "Usuarios", icon: UsersIcon },
   { to: "/app/animes", label: "Animes", icon: AnimesIcon },
   { to: "/app/questions", label: "Preguntas", icon: QuestionsIcon },
+  { to: "/app/games", label: "Juegos", icon: GamesIcon },
+  { to: "/app/products", label: "Productos", icon: ProductsIcon },
+  { to: "/app/redemptions", label: "Canjes", icon: RedemptionsIcon },
+  { to: "/app/leaderboard", label: "Rankings", icon: LeaderboardIcon },
   { to: "/app/settings", label: "Ajustes", icon: SettingsIcon },
 ];
 
@@ -95,6 +99,91 @@ function QuestionsIcon(props: SVGProps<SVGSVGElement>) {
       <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 2-3 4" />
       <line x1="12" x2="12" y1="17" y2="17" />
       <circle cx="12" cy="12" r="10" />
+    </svg>
+  );
+}
+
+function GamesIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function ProductsIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 2L3 6v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" x2="21" y1="6" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  );
+}
+
+function RedemptionsIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+      <line x1="8" x2="16" y1="21" y2="21" />
+      <line x1="12" x2="12" y1="17" y2="21" />
+    </svg>
+  );
+}
+
+function LeaderboardIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 2H2v2h20z" />
+      <path d="M22 8H2v2h20z" />
+      <path d="M22 14H2v2h20z" />
     </svg>
   );
 }

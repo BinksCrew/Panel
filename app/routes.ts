@@ -26,6 +26,22 @@ export default [
         file: "routes/dashboard/questions.tsx",
       },
       {
+        path: "games",
+        file: "routes/dashboard/games.tsx",
+      },
+      {
+        path: "products",
+        file: "routes/dashboard/products.tsx",
+      },
+      {
+        path: "redemptions",
+        file: "routes/dashboard/redemptions.tsx",
+      },
+      {
+        path: "leaderboard",
+        file: "routes/dashboard/leaderboard.tsx",
+      },
+      {
         path: "settings",
         file: "routes/dashboard/settings.tsx",
       },

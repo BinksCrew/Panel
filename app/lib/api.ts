@@ -193,4 +193,137 @@ export function fetchStats(token: string) {
   return request<{ users: number; animes: number; questions: number }>("/stats", { token });
 }
 
+// Game API functions
+export interface GameSessionRecord {
+  id: string;
+  user: { id: string; username?: string; fullName?: string };
+  totalQuestions: number;
+  correctAnswers: number;
+  pointsEarned: number;
+  isCompleted: boolean;
+  createdAt: string;
+  answers?: GameAnswerRecord[];
+}
+
+export interface GameAnswerRecord {
+  id: string;
+  question: { id: string; question: string };
+  userAnswer: string;
+  isCorrect: boolean;
+  pointsEarned: number;
+  answeredAt: string;
+}
+
+export interface GameStatsRecord {
+  totalGames: number;
+  totalCorrect: number;
+  totalPoints: number;
+  averageScore: number;
+  recentSessions: GameSessionRecord[];
+}
+
+export function fetchGameSessions(token: string) {
+  return request<GameSessionRecord[]>("/game/sessions", { token });
+}
+
+export function fetchGameStats(token: string) {
+  return request<GameStatsRecord>("/game/stats", { token });
+}
+
+// Product API functions
+export interface ProductRecord {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface ProductPayload {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;
+}
+
+export function fetchProducts(token: string) {
+  return request<ProductRecord[]>("/products", { token });
+}
+
+export function createProduct(payload: ProductPayload, token: string) {
+  return request<ProductRecord>("/products", {
+    method: "POST",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateProduct(id: string, payload: Partial<ProductPayload>, token: string) {
+  return request<ProductRecord>(`/products/${id}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteProduct(id: string, token: string) {
+  return request<{ message: string }>(`/products/${id}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+// Redemption API functions
+export interface RedemptionRecord {
+  id: string;
+  user: { id: string; username?: string; fullName?: string; email: string };
+  product: { id: string; name: string; price: number };
+  quantity: number;
+  totalPoints: number;
+  status: 'pending' | 'approved' | 'rejected' | 'delivered';
+  notes?: string;
+  createdAt: string;
+}
+
+export interface RedemptionPayload {
+  productId: string;
+  quantity: number;
+  notes?: string;
+}
+
+export function fetchRedemptions(token: string) {
+  return request<RedemptionRecord[]>("/redemptions", { token });
+}
+
+export function updateRedemptionStatus(id: string, status: string, notes?: string, token: string) {
+  return request<RedemptionRecord>(`/redemptions/${id}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify({ status, notes }),
+  });
+}
+
+// Leaderboard API functions
+export interface LeaderboardRecord {
+  id: string;
+  username?: string;
+  fullName?: string;
+  points: number;
+  photo_url?: string;
+}
+
+export function fetchLeaderboard(token: string, limit?: number) {
+  const params = limit ? `?limit=${limit}` : '';
+  return request<LeaderboardRecord[]>(`/leaderboard${params}`, { token });
+}
+
+export function fetchWeeklyLeaderboard(token: string, limit?: number) {
+  const params = limit ? `?limit=${limit}` : '';
+  return request<LeaderboardRecord[]>(`/leaderboard/weekly${params}`, { token });
+}
+
 export { API_BASE };

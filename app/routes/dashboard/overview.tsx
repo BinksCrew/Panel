@@ -7,9 +7,15 @@ import {
   fetchUsers,
   fetchAnimes,
   fetchStats,
+  fetchProducts,
+  fetchRedemptions,
+  fetchGameStats,
   type QuestionRecord,
   type UserRecord,
   type AnimeRecord,
+  type ProductRecord,
+  type RedemptionRecord,
+  type GameStatsRecord,
 } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import {
@@ -45,6 +51,9 @@ export default function OverviewRoute() {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [questions, setQuestions] = useState<QuestionRecord[]>([]);
   const [animes, setAnimes] = useState<AnimeRecord[]>([]);
+  const [products, setProducts] = useState<ProductRecord[]>([]);
+  const [redemptions, setRedemptions] = useState<RedemptionRecord[]>([]);
+  const [gameStats, setGameStats] = useState<GameStatsRecord | null>(null);
   const [stats, setStats] = useState<{ users: number; animes: number; questions: number } | null>(
     null
   );
@@ -55,17 +64,23 @@ export default function OverviewRoute() {
     setError(null);
     (async () => {
       try {
-        const [healthRes, usersRes, questionsRes, animesRes, statsRes] = await Promise.all([
+        const [healthRes, usersRes, questionsRes, animesRes, productsRes, redemptionsRes, gameStatsRes, statsRes] = await Promise.all([
           fetchHealth(token).catch(() => ({ status: "desconocido" })),
           fetchUsers(token),
           fetchQuestions(token),
           fetchAnimes(token),
+          fetchProducts(token),
+          fetchRedemptions(token),
+          fetchGameStats(token).catch(() => null),
           fetchStats(token),
         ]);
         setHealth(healthRes);
         setUsers(usersRes);
         setQuestions(questionsRes);
         setAnimes(animesRes);
+        setProducts(productsRes);
+        setRedemptions(redemptionsRes);
+        setGameStats(gameStatsRes);
         setStats(statsRes);
       } catch (err) {
         const message = err instanceof Error ? err.message : "No se pudo cargar";
@@ -94,9 +109,19 @@ export default function OverviewRoute() {
         delta: `${questions.filter((q) => q.type === "multiple-choice").length} múltiple-choice`,
       },
       {
-        label: "Apertura",
-        value: `${Math.round((questions.filter((q) => q.type === "open").length / Math.max(questions.length, 1)) * 100)}%`,
-        delta: "Preguntas abiertas",
+        label: "Productos",
+        value: products.length,
+        delta: `${products.filter((p) => p.isActive).length} activos`,
+      },
+      {
+        label: "Canjes",
+        value: redemptions.length,
+        delta: `${redemptions.filter((r) => r.status === 'pending').length} pendientes`,
+      },
+      {
+        label: "Juegos",
+        value: gameStats?.totalGames ?? 0,
+        delta: `${gameStats?.totalPoints ?? 0} puntos totales`,
       },
       {
         label: "Estado API",
@@ -104,7 +129,7 @@ export default function OverviewRoute() {
         delta: health?.database ?? "-",
       },
     ],
-    [stats, users.length, animes.length, questions, health]
+    [stats, users.length, animes.length, questions, products, redemptions, gameStats, health]
   );
 
   const questionTypeDistribution = useMemo(() => {
