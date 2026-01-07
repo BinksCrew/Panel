@@ -211,7 +211,6 @@ export default function DashboardLayout() {
   const { user, token, ready, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -223,29 +222,36 @@ export default function DashboardLayout() {
 
   const sidebar = useMemo(
     () => (
-      <aside
-        className={`sidebar ${collapsed ? "sidebar-collapsed" : ""}`}
-        aria-label="Navegación principal"
-      >
+      <aside className="sidebar" aria-label="Navegación principal">
         <div className="flex items-center justify-between gap-3 mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-lg font-bold">
               B
             </div>
-            {!collapsed && (
-              <div className="sidebar-brand">
-                <p className="text-sm opacity-80">Admin Board</p>
-                <p className="font-semibold">Binks Control</p>
-              </div>
-            )}
+            <div className="sidebar-brand">
+              <p className="text-sm opacity-80">Admin Board</p>
+              <p className="font-semibold">Binks Control</p>
+            </div>
           </div>
           <button
-            className="sidebar-toggle"
+            className="lg:hidden text-white hover:text-white/80"
             type="button"
-            onClick={() => setCollapsed((v) => !v)}
-            aria-label={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+            onClick={() => setMobileOpen(false)}
+            aria-label="Cerrar navegación"
           >
-            {collapsed ? "»" : "«"}
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
         <nav className="space-y-2">
@@ -260,37 +266,31 @@ export default function DashboardLayout() {
                 }`
               }
               onClick={() => setMobileOpen(false)}
-              title={collapsed ? item.label : undefined}
             >
               <item.icon />
-              {!collapsed && <span className="nav-label">{item.label}</span>}
+              <span className="nav-label">{item.label}</span>
             </NavLink>
           ))}
         </nav>
-        {!collapsed && (
-          <>
-            <div className="ghost-divider my-6" />
-            <div className="space-y-2 text-sm sidebar-meta">
-              <p className="text-white/70">Rol</p>
-              <p className="font-semibold">{user?.roles?.join(", ")}</p>
-              <p className="text-white/70">Correo</p>
-              <p className="font-semibold wrap-break-word">{user?.email}</p>
-            </div>
-          </>
-        )}
+        <div className="ghost-divider my-6" />
+        <div className="space-y-2 text-sm sidebar-meta">
+          <p className="text-white/70">Rol</p>
+          <p className="font-semibold">{user?.roles?.join(", ")}</p>
+          <p className="text-white/70">Correo</p>
+          <p className="font-semibold wrap-break-word">{user?.email}</p>
+        </div>
         <button
           className="btn-ghost w-full mt-8"
           onClick={() => {
             logout();
             navigate("/", { replace: true });
           }}
-          title={collapsed ? "Cerrar sesión" : undefined}
         >
-          {collapsed ? "↪" : "Cerrar sesión"}
+          Cerrar sesión
         </button>
       </aside>
     ),
-    [collapsed, navigate, user?.roles, user?.email, logout]
+    [navigate, user?.roles, user?.email, logout]
   );
 
   return (
@@ -303,11 +303,24 @@ export default function DashboardLayout() {
         <>
           <button
             type="button"
-            className="btn-ghost fixed top-4 left-4 z-40 lg:hidden"
+            className="btn-ghost fixed top-4 left-4 z-40 lg:hidden p-2"
             onClick={() => setMobileOpen(true)}
             aria-label="Abrir navegación"
           >
-            Menú
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </button>
 
           <div
@@ -317,15 +330,11 @@ export default function DashboardLayout() {
             onClick={() => setMobileOpen(false)}
           />
 
-          <div
-            className="h-full lg:grid"
-            style={{ gridTemplateColumns: collapsed ? "110px 1fr" : "280px 1fr" }}
-          >
+          <div className="h-full lg:grid lg:grid-cols-[280px_1fr]">
             <div
               className={`fixed inset-y-0 left-0 z-50 max-w-[85vw] transition-transform duration-200 lg:static lg:translate-x-0 lg:h-full ${
-                mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+                mobileOpen ? "translate-x-0" : "-translate-x-full"
               }`}
-              style={{ width: collapsed ? "110px" : "260px" }}
             >
               {sidebar}
             </div>
