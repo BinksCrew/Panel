@@ -57,7 +57,7 @@ export default function RedemptionsRoute() {
     if (!token) return;
 
     try {
-      await updateRedemptionStatus(id, newStatus, undefined, token);
+      await updateRedemptionStatus(id, newStatus, token, undefined);
       setMessage(`Canje ${statusLabels[newStatus as keyof typeof statusLabels].toLowerCase()} exitosamente`);
       loadRedemptions();
     } catch (err) {

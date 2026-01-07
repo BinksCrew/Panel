@@ -309,7 +309,7 @@ export default function OverviewRoute() {
           </div>
           <div className="space-y-3 flex-1 overflow-auto">
             {(loading ? Array.from({ length: 4 }) : topAnime).map((item, idx) => (
-              <div key={item?.label ?? idx} className="flex items-center gap-3">
+              <div key={idx} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-semibold flex items-center justify-center">
                   {idx + 1}
                 </div>
@@ -390,9 +390,10 @@ export default function OverviewRoute() {
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
                   Tipo {(question as QuestionRecord)?.type || "-"} · Anime{" "}
-                  {typeof (question as QuestionRecord)?.anime === "object"
-                    ? (question as QuestionRecord)?.anime?.name
-                    : (question as QuestionRecord)?.anime || "general"}
+                  {(() => {
+                    const anime = (question as QuestionRecord)?.anime;
+                    return typeof anime === "object" ? anime?.name : anime || "general";
+                  })()}
                 </p>
               </div>
             ))}

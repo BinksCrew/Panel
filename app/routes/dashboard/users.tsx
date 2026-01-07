@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createUser, deleteUser, fetchUsers, type UserRecord } from "../../lib/api";
+import { createUser, deleteUser, fetchUsers, updateUser, type UserRecord } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
+import { Badge } from "../../components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 
 export function meta() {
   return [{ title: "Panel | Usuarios" }, { name: "description", content: "Gestión de usuarios" }];
@@ -22,6 +28,7 @@ export default function UsersRoute() {
     cedula: "",
     phone: "",
   });
+  const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const PAGE_SIZE = 8;
   const [page, setPage] = useState(1);
@@ -68,17 +75,35 @@ export default function UsersRoute() {
     setError(null);
     setMessage(null);
     try {
-      await createUser(form, token);
-      setMessage("Usuario creado");
+      if (editingUser) {
+        await updateUser(editingUser.id, form, token);
+        setMessage("Usuario actualizado");
+      } else {
+        await createUser(form, token);
+        setMessage("Usuario creado");
+      }
       setForm({ email: "", password: "", fullName: "", cedula: "", phone: "" });
+      setEditingUser(null);
       setIsModalOpen(false);
       await load();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "No se pudo crear";
+      const message = err instanceof Error ? err.message : "No se pudo guardar";
       setError(message);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEdit = (user: UserRecord) => {
+    setEditingUser(user);
+    setForm({
+      email: user.email,
+      password: "",
+      fullName: user.fullName || "",
+      cedula: user.cedula || "",
+      phone: user.phone || "",
+    });
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -102,181 +127,146 @@ export default function UsersRoute() {
             <p className="text-sm text-slate-500">Usuarios</p>
             <h2 className="text-xl font-semibold text-slate-900">Listado</h2>
           </div>
-          <button type="button" className="btn-primary" onClick={() => setIsModalOpen(true)}>
-            Crear usuario
-          </button>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => { setEditingUser(null); setForm({ email: "", password: "", fullName: "", cedula: "", phone: "" }); }}>
+                Crear usuario
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingUser ? "Editar usuario" : "Crear usuario"}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  type="email"
+                  placeholder="Correo"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+                {!editingUser && (
+                  <Input
+                    type="password"
+                    placeholder="Contraseña"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    required
+                  />
+                )}
+                <Input
+                  type="text"
+                  placeholder="Nombre completo"
+                  value={form.fullName}
+                  onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                />
+                <Input
+                  type="text"
+                  placeholder="Cédula"
+                  value={form.cedula}
+                  onChange={(e) => setForm({ ...form, cedula: e.target.value })}
+                />
+                <Input
+                  type="tel"
+                  placeholder="Teléfono"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+                {error && <p className="text-red-600">{error}</p>}
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? "Guardando..." : editingUser ? "Actualizar" : "Crear"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-        <div className="table-wrapper flex-1 overflow-auto">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Roles</th>
-                <th>Identificación</th>
-                <th>Teléfono</th>
-                <th className="text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className="flex-1 overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Correo</TableHead>
+                <TableHead>Roles</TableHead>
+                <TableHead>Identificación</TableHead>
+                <TableHead>Teléfono</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {loading ? (
                 Array.from({ length: PAGE_SIZE }).map((_, idx) => (
-                  <tr key={`skeleton-${idx}`} className="animate-pulse">
-                    <td colSpan={6}>
-                      <div className="h-4 w-1/3 bg-slate-200 rounded" />
-                      <div className="h-3 w-1/4 bg-slate-200 rounded mt-2" />
-                    </td>
-                  </tr>
+                  <TableRow key={`skeleton-${idx}`}>
+                    <TableCell colSpan={6}>
+                      <div className="h-4 w-1/3 bg-slate-200 rounded animate-pulse" />
+                      <div className="h-3 w-1/4 bg-slate-200 rounded mt-2 animate-pulse" />
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-6 text-center text-slate-600">
+                <TableRow>
+                  <TableCell colSpan={6} className="py-6 text-center text-slate-600">
                     No hay usuarios registrados.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 paginatedUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>
+                  <TableRow key={user.id}>
+                    <TableCell>
                       <p className="font-semibold text-slate-900 leading-snug">
                         {user.fullName || "Sin nombre"}
                       </p>
                       <p className="text-xs text-slate-500 mt-1">ID: {user.id.slice(0, 6)}...</p>
-                    </td>
-                    <td>
-                      <p className="text-slate-800 wrap-break-word">{user.email}</p>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
                       <div className="flex flex-wrap gap-2">
                         {(user.roles?.length ? user.roles : ["sin rol"]).map((role) => (
-                          <span
-                            key={role}
-                            className="data-chip bg-emerald-100 text-emerald-800 border border-emerald-100"
-                          >
+                          <Badge key={role} variant="secondary">
                             {role}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
-                    </td>
-                    <td>
-                      {user.cedula ? (
-                        <span className="data-chip bg-white border border-slate-200 text-slate-800">
-                          {user.cedula}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-500">Sin dato</span>
-                      )}
-                    </td>
-                    <td>
-                      {user.phone ? (
-                        <span className="data-chip bg-white border border-slate-200 text-slate-800">
-                          {user.phone}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-500">Sin dato</span>
-                      )}
-                    </td>
-                    <td className="text-right">
-                      <button className="btn-ghost text-xs" onClick={() => handleDelete(user.id)}>
+                    </TableCell>
+                    <TableCell>{user.cedula || "Sin dato"}</TableCell>
+                    <TableCell>{user.phone || "Sin dato"}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(user)}>
+                        Editar
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(user.id)}>
                         Eliminar
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {!loading && users.length > 0 ? (
-          <div className="pagination-bar">
+          <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-slate-600">
               Página {page} de {totalPages}
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="pager-btn"
+              <Button
+                variant="outline"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
                 Anterior
-              </button>
-              <button
-                type="button"
-                className="pager-btn"
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
               >
                 Siguiente
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}
       </section>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-slate-900">Crear usuario</h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-5 overflow-y-auto">
-              <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-                <input
-                  className="input-field"
-                  placeholder="Nombre completo"
-                  value={form.fullName}
-                  onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
-                />
-                <input
-                  className="input-field"
-                  placeholder="Correo"
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                />
-                <input
-                  className="input-field"
-                  placeholder="Contraseña"
-                  type="password"
-                  required
-                  value={form.password}
-                  onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                />
-                <input
-                  className="input-field"
-                  placeholder="Cédula"
-                  value={form.cedula}
-                  onChange={(e) => setForm((p) => ({ ...p, cedula: e.target.value }))}
-                />
-                <input
-                  className="input-field"
-                  placeholder="Teléfono"
-                  value={form.phone}
-                  onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                />
-                <div className="md:col-span-2 flex justify-end gap-3 mt-4">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="btn-ghost">
-                    Cancelar
-                  </button>
-                  <button type="submit" className="btn-primary" disabled={submitting}>
-                    {submitting ? "Guardando..." : "Crear usuario"}
-                  </button>
-                </div>
-              </form>
-              {message ? <p className="text-sm text-emerald-700 mt-3">{message}</p> : null}
-              {error ? <p className="text-sm text-red-600 mt-3">{error}</p> : null}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

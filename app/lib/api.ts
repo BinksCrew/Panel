@@ -122,6 +122,18 @@ export function deleteUser(id: string, token: string) {
   return request<{ message: string }>(`/users/${id}`, { method: "DELETE", token });
 }
 
+export function updateUser(id: string, payload: Partial<UserPayload>, token: string) {
+  const form = new FormData();
+  if (payload.cedula) form.append("cedula", payload.cedula);
+  if (payload.email) form.append("email", payload.email);
+  if (payload.password) form.append("password", payload.password);
+  if (payload.fullName) form.append("fullName", payload.fullName);
+  if (payload.username) form.append("username", payload.username);
+  if (payload.phone) form.append("phone", payload.phone);
+  if (payload.file) form.append("file", payload.file);
+  return request<UserRecord>(`/users/${id}`, { method: "PATCH", body: form, token });
+}
+
 export interface QuestionRecord {
   id: string;
   question: string;
@@ -159,6 +171,14 @@ export function deleteQuestion(id: string, token: string) {
   });
 }
 
+export function updateQuestion(id: string, payload: Partial<QuestionPayload>, token: string) {
+  return request<QuestionRecord>(`/questions/${id}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
 export interface AnimeRecord {
   id: string;
   name: string;
@@ -186,6 +206,18 @@ export function deleteAnime(id: string, token: string) {
   return request<void>(`/animes/${id}`, {
     method: "DELETE",
     token,
+  });
+}
+
+export function updateAnime(
+  id: string,
+  data: Partial<{ name: string; description?: string; coverImage?: string }>,
+  token: string
+) {
+  return request<AnimeRecord>(`/animes/${id}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(data),
   });
 }
 
@@ -299,7 +331,7 @@ export function fetchRedemptions(token: string) {
   return request<RedemptionRecord[]>("/redemptions", { token });
 }
 
-export function updateRedemptionStatus(id: string, status: string, notes?: string, token: string) {
+export function updateRedemptionStatus(id: string, status: string, token: string, notes?: string) {
   return request<RedemptionRecord>(`/redemptions/${id}`, {
     method: "PATCH",
     token,
